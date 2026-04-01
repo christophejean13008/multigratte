@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tables de multiplication — Grattage</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap');
+
+  :root {
+    --bg: #1a1a2e;
+    --surface: #16213e;
+    --card: #0f3460;
+    --gold: #f5a623;
+    --gold2: #ffd700;
+    --green: #2ecc71;
+    --red: #e74c3c;
+    --text: #eef2ff;
+    --scratch-color: #c0a060;
+    --scratch-color2: #8B6914;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── STARS background ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 20% 30%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 50% 60%, rgba(255,255,255,.7) 0%, transparent 100%),
+      radial-gradient(1px 1px at 10% 80%, rgba(255,255,255,.4) 0%, transparent 100%),
+      radial-gradient(1px 1px at 90% 70%, rgba(255,255,255,.5) 0%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 35% 15%, rgba(255,255,255,.6) 0%, transparent 100%),
+      radial-gradient(1px 1px at 65% 85%, rgba(255,255,255,.4) 0%, transparent 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ══════════════ PAGE GARDE ══════════════ */
+  #page-garde {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 40px 20px;
+    gap: 32px;
+  }
+
+  .titre-jeu {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 6vw, 4rem);
+    color: var(--gold2);
+    text-shadow: 0 0 30px rgba(255, 215, 0, .5), 3px 3px 0 #8B6914;
+    letter-spacing: 2px;
+    text-align: center;
+  }
+
+  .sous-titre {
+    font-size: 1.1rem;
+    color: rgba(255,255,255,.7);
+    text-align: center;
+  }
+
+  .selection-box {
+    background: rgba(255,255,255,.05);
+    border: 2px solid rgba(245, 166, 35, .3);
+    border-radius: var(--radius);
+    padding: 32px;
+    width: 100%;
+    max-width: 680px;
+    backdrop-filter: blur(10px);
+  }
+
+  .selection-titre {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--gold);
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .grille-tables {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+  }
+
+  .table-btn {
+    background: var(--surface);
+    border: 2px solid rgba(255,255,255,.15);
+    border-radius: 12px;
+    color: var(--text);
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    padding: 16px 8px;
+    cursor: pointer;
+    transition: all .2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .table-btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,215,0,.15), transparent);
+    opacity: 0;
+    transition: opacity .2s;
+  }
+
+  .table-btn:hover { transform: translateY(-2px); border-color: var(--gold); }
+  .table-btn:hover::after { opacity: 1; }
+
+  .table-btn.selected {
+    background: linear-gradient(135deg, #c8860a, var(--gold));
+    border-color: var(--gold2);
+    color: #1a1a2e;
+    transform: scale(1.05);
+    box-shadow: 0 4px 20px rgba(245, 166, 35, .5);
+  }
+
+  .raccourcis {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+
+  .raccourci-btn {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.2);
+    border-radius: 8px;
+    color: rgba(255,255,255,.6);
+    font-family: 'Nunito', sans-serif;
+    font-size: .85rem;
+    padding: 6px 14px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .raccourci-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+  .btn-jouer {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.5rem;
+    padding: 18px 60px;
+    background: linear-gradient(135deg, #f5a623, #ffd700);
+    border: none;
+    border-radius: 50px;
+    color: #1a1a2e;
+    cursor: pointer;
+    box-shadow: 0 6px 30px rgba(245, 166, 35, .5), 0 2px 0 #8B6914;
+    transition: all .2s;
+    letter-spacing: 1px;
+  }
+  .btn-jouer:hover { transform: translateY(-3px); box-shadow: 0 10px 40px rgba(245, 166, 35, .7), 0 2px 0 #8B6914; }
+  .btn-jouer:active { transform: translateY(0); }
+  .btn-jouer:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+
+  /* ══════════════ PAGE JEU ══════════════ */
+  #page-jeu {
+    display: none;
+    position: relative;
+    z-index: 1;
+    padding: 20px;
+    min-height: 100vh;
+  }
+
+  .jeu-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .jeu-titre {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.6rem;
+    color: var(--gold2);
+  }
+
+  .compteur {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.15);
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 700;
+    font-size: 1rem;
+    display: flex;
+    gap: 16px;
+  }
+
+  .compteur span { color: var(--gold); }
+
+  .btn-retour {
+    background: transparent;
+    border: 1px solid rgba(255,255,255,.25);
+    border-radius: 10px;
+    color: rgba(255,255,255,.7);
+    font-family: 'Nunito', sans-serif;
+    font-size: .9rem;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .btn-retour:hover { border-color: var(--gold); color: var(--gold); }
+
+  /* ── GRILLE CARTES ── */
+  #grille-jeu {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
+  }
+
+  /* ── CARTE INDIVIDUELLE ── */
+  .carte {
+    aspect-ratio: 1;
+    border-radius: 14px;
+    position: relative;
+    cursor: pointer;
+    overflow: hidden;
+    border: 2px solid rgba(255,215,0,.25);
+    box-shadow: 0 4px 15px rgba(0,0,0,.4);
+    transition: box-shadow .2s;
+  }
+
+  .carte:hover:not(.validee):not(.en-cours) {
+    box-shadow: 0 6px 25px rgba(245,166,35,.3);
+  }
+
+  /* ── Structure de la carte ── */
+  /* Fond de la carte = toujours visible */
+  .carte .fond-carte {
+    position: absolute;
+    inset: 0;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 8px 8px;
+    gap: 6px;
+    z-index: 1;
+  }
+
+  .carte .multiplication-visible {
+    font-family: 'Fredoka One', cursive;
+    font-size: .9rem;
+    color: rgba(255,255,255,.65);
+    letter-spacing: 1px;
+  }
+
+  /* Zone résultat : grande, occupe la majorité de la carte */
+  .carte .zone-resultat {
+    position: relative;
+    width: 88%;
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .carte .reponse {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.6rem;
+    color: var(--gold2);
+    text-shadow: 0 0 15px rgba(255,215,0,.4);
+    position: absolute;
+    z-index: 0;
+  }
+
+  /* Overlay "Court !" — couvre toute la carte */
+  .carte .overlay-court {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    background: rgba(160,20,20,.93);
+    border-radius: 12px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px;
+  }
+  .carte.en-attente-ardoise .overlay-court { display: flex; }
+
+  .overlay-court .court-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: #fff;
+    text-shadow: 0 2px 8px rgba(0,0,0,.5);
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .overlay-court .court-op {
+    font-family: 'Nunito', sans-serif;
+    font-size: .72rem;
+    color: rgba(255,255,255,.75);
+  }
+  .overlay-court .btn-ok-ardoise {
+    margin-top: 6px;
+    font-family: 'Fredoka One', cursive;
+    font-size: .85rem;
+    padding: 5px 14px;
+    background: var(--gold);
+    color: #1a1a2e;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .15s;
+  }
+  .overlay-court .btn-ok-ardoise:hover { transform: scale(1.08); }
+
+  /* Canvas scratch : uniquement sur la zone résultat */
+  .carte canvas {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    border-radius: 10px;
+    cursor: crosshair;
+    touch-action: none;
+  }
+
+  .carte .boutons-validation {
+    display: flex;
+    gap: 8px;
+    padding-bottom: 6px;
+  }
+
+  .carte .btn-ok, .carte .btn-ko {
+    font-family: 'Fredoka One', cursive;
+    font-size: .85rem;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: transform .15s;
+  }
+  .carte .btn-ok:hover, .carte .btn-ko:hover { transform: scale(1.1); }
+
+  .carte .btn-ok {
+    background: var(--green);
+    color: white;
+  }
+  .carte .btn-ko {
+    background: var(--red);
+    color: white;
+  }
+
+  /* ─ États finaux ─ */
+  .carte.validee-ok .fond-carte {
+    background: linear-gradient(135deg, #1a4a2e, #0d3320);
+  }
+  .carte.validee-ok {
+    border-color: var(--green);
+    box-shadow: 0 0 15px rgba(46,204,113,.3);
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .carte.en-attente-ardoise .fond-carte {
+    background: linear-gradient(135deg, #4a1a1a, #330d0d);
+  }
+  .carte.en-attente-ardoise {
+    border-color: var(--red);
+    box-shadow: 0 0 15px rgba(231,76,60,.3);
+  }
+
+  /* message ardoise */
+  .carte .msg-ardoise {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 4px;
+    font-size: .8rem;
+    color: rgba(255,255,255,.7);
+  }
+  .carte .msg-ardoise .emoji-ardoise { font-size: 1.5rem; }
+  .carte.validee-ok .boutons-validation { display: none !important; }
+  .carte.validee-ok .multiplication-visible {
+    font-size: 1rem;
+    color: rgba(255,255,255,.9);
+  }
+
+  /* ── VICTOIRE ── */
+  #page-victoire {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(26,26,46,.95);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 24px;
+    text-align: center;
+    padding: 40px;
+  }
+
+  .victoire-titre {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    color: var(--gold2);
+    text-shadow: 0 0 40px rgba(255,215,0,.8), 3px 3px 0 #8B6914;
+    animation: pulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.05); } }
+
+  .confettis {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 99;
+    overflow: hidden;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    animation: tomber linear forwards;
+  }
+  @keyframes tomber {
+    0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+  }
+
+  .btn-rejouer {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    padding: 16px 50px;
+    background: linear-gradient(135deg, #f5a623, #ffd700);
+    border: none;
+    border-radius: 50px;
+    color: #1a1a2e;
+    cursor: pointer;
+    box-shadow: 0 6px 25px rgba(245,166,35,.5);
+    transition: all .2s;
+  }
+  .btn-rejouer:hover { transform: translateY(-3px); }
+
+  /* responsive */
+  @media(max-width: 480px) {
+    .grille-tables { grid-template-columns: repeat(5, 1fr); }
+    #grille-jeu { grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 10px; }
+    .carte .reponse { font-size: 1.8rem; }
+  }
+
+  /* ── Consigne étapes ── */
+  .consigne-etapes {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    max-width: 800px;
+    width: 100%;
+  }
+
+  .etape {
+    background: rgba(255,255,255,.06);
+    border: 1px solid rgba(245,166,35,.25);
+    border-radius: 14px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 120px;
+    flex: 1;
+    max-width: 160px;
+    text-align: center;
+  }
+
+  .etape-icone {
+    font-size: 1.8rem;
+  }
+
+  .etape-titre {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: var(--gold);
+  }
+
+  .etape-desc {
+    font-size: .75rem;
+    color: rgba(255,255,255,.6);
+    line-height: 1.3;
+  }
+
+  .etape-fleche {
+    font-size: 1.4rem;
+    color: rgba(255,255,255,.3);
+    flex-shrink: 0;
+  }
+
+  @media(max-width: 480px) {
+    .etape-fleche { display: none; }
+    .etape { max-width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ PAGE GARDE ══ -->
+<section id="page-garde">
+  <h1 class="titre-jeu">🎰 Tables à gratter !</h1>
+  <p class="sous-titre">Choisis les tables que tu veux réviser, puis gratte pour découvrir les réponses.</p>
+
+  <div class="consigne-etapes">
+    <div class="etape">
+      <span class="etape-icone">🪙</span>
+      <span class="etape-titre">Gratte</span>
+      <span class="etape-desc">Découvre le résultat caché</span>
+    </div>
+    <div class="etape-fleche">→</div>
+    <div class="etape">
+      <span class="etape-icone">✅</span>
+      <span class="etape-titre">Choisis</span>
+      <span class="etape-desc">OK si tu savais, Pas ok sinon</span>
+    </div>
+    <div class="etape-fleche">→</div>
+    <div class="etape">
+      <span class="etape-icone">🏃</span>
+      <span class="etape-titre">Cours !</span>
+      <span class="etape-desc">Écris l'opération sur une feuille ou l'ardoise</span>
+    </div>
+    <div class="etape-fleche">→</div>
+    <div class="etape">
+      <span class="etape-icone">☑️</span>
+      <span class="etape-titre">Valide</span>
+      <span class="etape-desc">Reviens appuyer sur C'est fait !</span>
+    </div>
+  </div>
+
+  <div class="selection-box">
+    <div class="selection-titre">Quelles tables veux-tu travailler ?</div>
+    <div class="grille-tables" id="grille-selection">
+      <!-- boutons 2→10 injectés en JS -->
+    </div>
+    <div class="raccourcis">
+      <button class="raccourci-btn" onclick="toutSelectionner()">Tout sélectionner</button>
+      <button class="raccourci-btn" onclick="toutDeselectionner()">Tout effacer</button>
+    </div>
+  </div>
+
+  <button class="btn-jouer" id="btn-jouer" onclick="demarrerJeu()" disabled>
+    🎲 Jouer !
+  </button>
+</section>
+
+<!-- ══ PAGE JEU ══ -->
+<section id="page-jeu">
+  <div class="jeu-header">
+    <div class="jeu-titre">🎰 Tables à gratter</div>
+    <div class="compteur">
+      ✅ <span id="compteur-ok">0</span>&nbsp;ok &nbsp;|&nbsp; 🎴 <span id="compteur-total">0</span>&nbsp;cartes
+    </div>
+    <button class="btn-retour" onclick="retourGarde()">← Changer les tables</button>
+  </div>
+  <div id="grille-jeu"></div>
+</section>
+
+<!-- ══ PAGE VICTOIRE ══ -->
+<div id="page-victoire">
+  <div class="confettis" id="confettis"></div>
+  <div class="victoire-titre">🌟 Bravo ! 🌟</div>
+  <p style="font-size:1.4rem; color:rgba(255,255,255,.8);">Tu as maîtrisé toutes les cartes !</p>
+  <button class="btn-rejouer" onclick="retourGarde()">🔄 Recommencer</button>
+</div>
+
+<script>
+// ── Sélection des tables ──────────────────────────────────────────
+const tablesChoisies = new Set();
+
+function buildSelection() {
+  const grille = document.getElementById('grille-selection');
+  for (let i = 2; i <= 10; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'table-btn';
+    btn.textContent = i;
+    btn.dataset.table = i;
+    btn.addEventListener('click', () => toggleTable(i, btn));
+    grille.appendChild(btn);
+  }
+}
+
+function toggleTable(n, btn) {
+  if (tablesChoisies.has(n)) { tablesChoisies.delete(n); btn.classList.remove('selected'); }
+  else { tablesChoisies.add(n); btn.classList.add('selected'); }
+  document.getElementById('btn-jouer').disabled = tablesChoisies.size === 0;
+}
+
+function toutSelectionner() {
+  document.querySelectorAll('.table-btn').forEach(b => {
+    const n = +b.dataset.table; tablesChoisies.add(n); b.classList.add('selected');
+  });
+  document.getElementById('btn-jouer').disabled = false;
+}
+
+function toutDeselectionner() {
+  tablesChoisies.clear();
+  document.querySelectorAll('.table-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('btn-jouer').disabled = true;
+}
+
+// ── Génération des opérations ─────────────────────────────────────
+function genererOperations(tables) {
+  const ops = [];
+  tables.forEach(t => {
+    for (let i = 1; i <= 10; i++) ops.push({ a: t, b: i, r: t * i });
+  });
+  // Fisher-Yates shuffle
+  for (let i = ops.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [ops[i], ops[j]] = [ops[j], ops[i]];
+  }
+  return ops;
+}
+
+// ── Compteurs ──────────────────────────────────────────────────────
+let totalCartes = 0, okCartes = 0;
+
+function majCompteur() {
+  document.getElementById('compteur-ok').textContent = okCartes;
+  document.getElementById('compteur-total').textContent = totalCartes;
+  if (okCartes === totalCartes) setTimeout(victoire, 400);
+}
+
+// ── Démarrage ──────────────────────────────────────────────────────
+function demarrerJeu() {
+  const ops = genererOperations([...tablesChoisies]);
+  totalCartes = ops.length;
+  okCartes = 0;
+  document.getElementById('page-garde').style.display = 'none';
+  document.getElementById('page-jeu').style.display = 'block';
+  const grille = document.getElementById('grille-jeu');
+  grille.innerHTML = '';
+  majCompteur();
+  ops.forEach(op => grille.appendChild(creerCarte(op)));
+}
+
+function retourGarde() {
+  document.getElementById('page-jeu').style.display = 'none';
+  document.getElementById('page-victoire').style.display = 'none';
+  document.getElementById('page-garde').style.display = 'flex';
+}
+
+// ── Création d'une carte ───────────────────────────────────────────
+function creerCarte(op) {
+  const div = document.createElement('div');
+  div.className = 'carte';
+
+  div.innerHTML = `
+    <div class="fond-carte">
+      <div class="overlay-court">
+        <div class="court-label">🏃 Court !</div>
+        <div class="court-op">${op.a} × ${op.b} = ${op.r}</div>
+        <button class="btn-ok-ardoise">✅ C'est fait !</button>
+      </div>
+      <div class="multiplication-visible">${op.a} × ${op.b} =</div>
+      <div class="zone-resultat">
+        <div class="reponse">${op.r}</div>
+        <canvas></canvas>
+      </div>
+      <div class="boutons-validation" style="display:none">
+        <button class="btn-ok">✅ OK</button>
+        <button class="btn-ko">❌ Pas ok</button>
+      </div>
+    </div>
+  `;
+
+  const canvas = div.querySelector('canvas');
+  const btnOk = div.querySelector('.btn-ok');
+  const btnKo = div.querySelector('.btn-ko');
+  const btnOkArdoise = div.querySelector('.btn-ok-ardoise');
+  const boutonsVal = div.querySelector('.boutons-validation');
+  let revealed = false;
+
+  requestAnimationFrame(() => initCanvas(canvas, div, () => {
+    revealed = true;
+    setTimeout(() => { boutonsVal.style.display = 'flex'; }, 900);
+  }));
+
+  btnOk.addEventListener('click', () => {
+    if (!revealed) return;
+    div.classList.add('validee-ok');
+    div.classList.remove('en-attente-ardoise');
+    div.querySelector('.multiplication-visible').textContent = `${op.a} × ${op.b} = ${op.r}`;
+    okCartes++;
+    majCompteur();
+  });
+
+  btnKo.addEventListener('click', () => {
+    if (!revealed) return;
+    div.classList.add('en-attente-ardoise');
+  });
+
+  btnOkArdoise.addEventListener('click', () => {
+    div.classList.remove('en-attente-ardoise');
+    div.classList.add('validee-ok');
+    div.querySelector('.multiplication-visible').textContent = `${op.a} × ${op.b} = ${op.r}`;
+    okCartes++;
+    majCompteur();
+  });
+
+  return div;
+}
+
+// ── Logique scratch ────────────────────────────────────────────────
+function initCanvas(canvas, carte, onReveal) {
+  const zone = canvas.parentElement; // .zone-resultat
+  const W = zone.offsetWidth;
+  const H = zone.offsetHeight;
+  canvas.width = W;
+  canvas.height = H;
+
+  const ctx = canvas.getContext('2d');
+
+  // Texture dorée avec motif hachuré
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, '#d4a017');
+  grad.addColorStop(0.4, '#f5c842');
+  grad.addColorStop(0.7, '#c8900a');
+  grad.addColorStop(1, '#b8860b');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Lignes diagonales pour effet "grattage"
+  ctx.strokeStyle = 'rgba(255,255,255,0.12)';
+  ctx.lineWidth = 1;
+  for (let i = -H; i < W + H; i += 6) {
+    ctx.beginPath();
+    ctx.moveTo(i, 0);
+    ctx.lineTo(i + H, H);
+    ctx.stroke();
+  }
+
+  // Texte "?" en sombre pour indiquer qu'il faut gratter
+  ctx.fillStyle = 'rgba(100,60,0,0.6)';
+  ctx.font = `bold ${Math.floor(H * 0.6)}px 'Fredoka One', cursive`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('?', W / 2, H / 2);
+
+  let gratter = false;
+  let revealed = false;
+
+  function pos(e) {
+    const r = canvas.getBoundingClientRect();
+    if (e.touches) return { x: e.touches[0].clientX - r.left, y: e.touches[0].clientY - r.top };
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  }
+
+  function scratch(x, y) {
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.arc(x, y, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  function checkReveal() {
+    if (revealed) return;
+    const data = ctx.getImageData(0, 0, W, H).data;
+    let transparent = 0;
+    for (let i = 3; i < data.length; i += 4) { if (data[i] < 128) transparent++; }
+    if (transparent / (W * H) > 0.45) {
+      revealed = true;
+      ctx.clearRect(0, 0, W, H);
+      canvas.style.pointerEvents = 'none';
+      onReveal();
+    }
+  }
+
+  canvas.addEventListener('mousedown', e => { gratter = true; scratch(...Object.values(pos(e))); });
+  canvas.addEventListener('mousemove', e => { if (!gratter) return; scratch(...Object.values(pos(e))); checkReveal(); });
+  canvas.addEventListener('mouseup', () => { gratter = false; checkReveal(); });
+  canvas.addEventListener('mouseleave', () => { gratter = false; });
+
+  canvas.addEventListener('touchstart', e => { e.preventDefault(); gratter = true; const p = pos(e); scratch(p.x, p.y); }, { passive: false });
+  canvas.addEventListener('touchmove', e => { e.preventDefault(); if (!gratter) return; const p = pos(e); scratch(p.x, p.y); checkReveal(); }, { passive: false });
+  canvas.addEventListener('touchend', () => { gratter = false; checkReveal(); });
+}
+
+// ── Victoire ──────────────────────────────────────────────────────
+function victoire() {
+  const pv = document.getElementById('page-victoire');
+  pv.style.display = 'flex';
+  lancerConfettis();
+}
+
+function lancerConfettis() {
+  const container = document.getElementById('confettis');
+  container.innerHTML = '';
+  const couleurs = ['#ffd700', '#f5a623', '#2ecc71', '#3498db', '#e74c3c', '#9b59b6', '#1abc9c', '#ffffff'];
+  for (let i = 0; i < 120; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.top = '-20px';
+    c.style.background = couleurs[Math.floor(Math.random() * couleurs.length)];
+    c.style.width = (8 + Math.random() * 12) + 'px';
+    c.style.height = (8 + Math.random() * 12) + 'px';
+    c.style.borderRadius = Math.random() > .5 ? '50%' : '2px';
+    c.style.animationDuration = (2 + Math.random() * 3) + 's';
+    c.style.animationDelay = (Math.random() * 2) + 's';
+    container.appendChild(c);
+  }
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+buildSelection();
+</script>
+</body>
+</html>
